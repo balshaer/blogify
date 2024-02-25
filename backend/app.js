@@ -1,6 +1,11 @@
 const express = require("express");
 const mongoose = require("mongoose");
+const connectToDb = require("./config/connectToDb");
 require("dotenv").config();
+
+// Connect to mongoose database
+
+connectToDb();
 
 // Init App
 const app = express();
