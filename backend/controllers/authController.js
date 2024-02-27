@@ -1,20 +1,17 @@
-const mongoose = require("mongoose");
 const asyncHandler = require("express-async-handler");
 const bcrypt = require("bcrypt");
-const { User, validateRegisterUser } = require("../models/User");
+const { User, validateRegisterUser, validateLogin } = require("../models/User");
 
 /**----------------------------------------------------------------
  * @desc Register New User
- * @router /api/auth/register
+ * @route /api/auth/register
  * @method POST
  * @access public
  * ----------------------------------------------------------------
  */
 
-//Register Controller
-
-const registerController = asyncHandler(async (req, res) => {
-  const { error } = validateRegisterUser(req.body);
+module.exports.registerController = asyncHandler(async (req, res) => {
+  const { error } = validateLogin(req.body);
 
   if (error) {
     return res.status(400).json({ message: error.details[0].message });
@@ -42,4 +39,41 @@ const registerController = asyncHandler(async (req, res) => {
     .json({ message: "Your Registration is successfully please log in" });
 });
 
-module.exports = registerController;
+/**----------------------------------------------------------------
+ * @desc Login New User
+ * @route /api/auth/login
+ * @method POST
+ * @access public
+ * ----------------------------------------------------------------
+ */
+
+module.exports.loginController = asyncHandler(async (req, res) => {
+  const error = validateLogin(req.body);
+
+  if (error) {
+    return res.status(401).json({ message: error.details[0] });
+  }
+
+  const isUserExist = User.findOne({ email: req.body.email });
+
+  if (!isUserExist) {
+    return res.send
+      .status(401)
+      .json({ message: "Invalid in email or password" });
+  }
+
+  const isPasswordMatch = bcrypt.compare(req.body.password, User.password);
+
+  if (!isPasswordMatch) {
+    return res.status(401).json({ message: "Invalid in email or password" });
+  }
+
+  const token = User.generateLoginToken();
+
+  res.status(200).json({
+    id: User._id,
+    isAdmin: User.isAdmin,
+    profilePhoto: User.profilePhoto,
+    token,
+  });
+});
