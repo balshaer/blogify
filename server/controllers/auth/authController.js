@@ -1,5 +1,9 @@
 const asyncHandler = require("express-async-handler");
-const { User, validateRegisterUser } = require("../../models/User");
+const {
+  User,
+  validateRegisterUser,
+  validateLoginUser,
+} = require("../../models/User");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 
@@ -46,4 +50,41 @@ const registerController = asyncHandler(async (req, res) => {
   res.status(201).json({ ...other, token });
 });
 
-module.exports = { registerController };
+/**
+ *@desc   : login user
+ *@router : /api/auth/login
+ *@method : POST
+ *@access : public
+ **/
+
+const loginController = asyncHandler(async (req, res) => {
+  let user = await User.findOne({ email: req.body.email });
+
+  const { error } = validateLoginUser(req.body);
+
+  if (error) {
+    return res.status(400).json({ message: error.details[0].message });
+  }
+
+  if (!user) {
+    return res.status(404).json({ message: "invaild email or password" });
+  }
+
+  const isPasswordMatch = await bcrypt.compare(
+    req.body.password,
+    user.password
+  );
+
+  if (!isPasswordMatch) {
+    return res.status(400).json({ message: "invaild email or password" });
+  }
+
+  const token = jwt.sign(
+    { id: req.body._id, isAdmin: req.body.isAdmin },
+    process.env.SECRET_KEY
+  );
+
+  res.status(201).json({ token });
+});
+
+module.exports = { registerController, loginController };
