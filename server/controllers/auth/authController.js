@@ -8,10 +8,12 @@ const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 
 /**
+ * -------------------------------------------------
  *@desc   : register a new user
  *@router : /api/auth/register
  *@method : POST
  *@access : public
+ *-------------------------------------------------
  **/
 
 const registerController = asyncHandler(async (req, res) => {
@@ -28,6 +30,8 @@ const registerController = asyncHandler(async (req, res) => {
 
   const salt = await bcrypt.genSalt(10);
   const hashThePassword = await bcrypt.hash(req.body.password, salt);
+
+  //@TODO : Check if the account is verified
 
   user = new User({
     fullName: req.body.fullName,
@@ -51,14 +55,16 @@ const registerController = asyncHandler(async (req, res) => {
 });
 
 /**
+ * -------------------------------------------------
  *@desc   : login user
  *@router : /api/auth/login
  *@method : POST
  *@access : public
+ *-------------------------------------------------
  **/
 
 const loginController = asyncHandler(async (req, res) => {
-  let user = await User.findOne({ email: req.body.email });
+  const user = await User.findOne({ email: req.body.email });
 
   const { error } = validateLoginUser(req.body);
 
@@ -79,8 +85,10 @@ const loginController = asyncHandler(async (req, res) => {
     return res.status(400).json({ message: "invaild email or password" });
   }
 
+  //@TODO : Check if the account is verified
+
   const token = jwt.sign(
-    { id: req.body._id, isAdmin: req.body.isAdmin },
+    { id: user._id, isAdmin: user.isAdmin },
     process.env.SECRET_KEY
   );
 

@@ -7,9 +7,10 @@ app.use(express.json());
 const PORT = process.env.PORT || 8000;
 const { notFound, errorHandler } = require("./middlewares/error");
 
-const authRoute = require("./routes/auth/authRoute");
+app.use("/api/auth", require("./routes/auth/authRoute"));
+app.use("/api/auth", require("./routes/auth/authRoute"));
 
-app.use("/api/auth", authRoute);
+app.use("/api/users", require("./routes/users/usersRoute"));
 
 app.use(notFound);
 app.use(errorHandler);
