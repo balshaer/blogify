@@ -19,6 +19,7 @@ const jwt = require("jsonwebtoken");
 const registerController = asyncHandler(async (req, res) => {
   let user = await User.findOne({ email: req.body.email });
   const { error } = validateRegisterUser(req.body);
+  const username = await User.findOne({ username: req.body.username });
 
   if (error) {
     return res.status(400).json({ message: error.details[0].message });
@@ -26,6 +27,12 @@ const registerController = asyncHandler(async (req, res) => {
 
   if (user) {
     return res.status(400).json({ message: "this user is already registered" });
+  }
+
+  if (username) {
+    return res
+      .status(400)
+      .json({ message: "this username is already been taken" });
   }
 
   const salt = await bcrypt.genSalt(10);
