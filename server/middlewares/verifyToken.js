@@ -36,11 +36,9 @@ function verifyTokenAndEditUser(req, res, next) {
     if (req.user.id === req.params.id) {
       next();
     } else {
-      return res
-        .status(403)
-        .json({ message: "you are not allowed" });
+      return res.status(403).json({ message: "you are not allowed" });
     }
   });
 }
 
-module.exports = { verifyTokenAndAdmin, verifyTokenAndEditUser };
+module.exports = { verifyTokenAndAdmin, verifyTokenAndEditUser, verifyToken };

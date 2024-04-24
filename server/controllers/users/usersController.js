@@ -47,7 +47,7 @@ const getUserProfile = asyncHandler(async (req, res) => {
     return res.status(404).json({ message: "user not found" });
   }
 
-  res.status(200).json({ user });
+  res.status(200).json(user);
 });
 
 /**
@@ -91,9 +91,29 @@ const editUserProfile = asyncHandler(async (req, res) => {
   res.status(200).json(result);
 });
 
+/**
+ * -------------------------------------------------
+ *@desc   : upload profile photo
+ *@router : /api/users/profile-photo
+ *@method : POST
+ *@access : private (only himself)
+ *-------------------------------------------------
+ **/
+
+const uploadProfilePhoto = asyncHandler(async (req, res) => {
+  if (!req.file) {
+    return res.status(404).json({ message: "no file provided" });
+  }
+
+  return res
+    .status(200)
+    .json({ message: "your profile photo uploaded successfully" });
+});
+
 module.exports = {
   getAllUsers,
   getUsersCount,
   getUserProfile,
   editUserProfile,
+  uploadProfilePhoto,
 };
