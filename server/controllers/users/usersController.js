@@ -1,6 +1,11 @@
 const asyncHandler = require("express-async-handler");
 const { User, validateEditUser } = require("../../models/User");
 const bcrypt = require("bcrypt");
+const path = require("path");
+const {
+  cloudinaryUploadImage,
+  cloudinaryRemoveImage,
+} = require("../../utils/cloudinary");
 
 /**
  * -------------------------------------------------
@@ -105,9 +110,31 @@ const uploadProfilePhoto = asyncHandler(async (req, res) => {
     return res.status(404).json({ message: "no file provided" });
   }
 
-  return res
-    .status(200)
-    .json({ message: "your profile photo uploaded successfully" });
+  const imagePath = path.join(__dirname, `../../images/${req.file.filename}`);
+
+  const result = await cloudinaryUploadImage(imagePath);
+
+  const user = await User.findById(req.params.id);
+
+  // Check if user has a profile photo
+  if (user.profilePhoto && user.profilePhoto.publicId !== null) {
+    await cloudinaryRemoveImage(user.profilePhoto.publicId);
+  }
+
+  user.profilePhoto = {
+    url: result.secure_url,
+    publicId: result.public_Id,
+  };
+
+  await user.save();
+
+  return res.status(200).json({
+    message: "your profile photo uploaded successfully",
+    profilePhoto: {
+      url: result.secure_url,
+      publicId: result.public_Id,
+    },
+  });
 });
 
 module.exports = {
