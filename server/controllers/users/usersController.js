@@ -7,6 +7,8 @@ const {
   cloudinaryRemoveImage,
 } = require("../../utils/cloudinary");
 
+const fs = require("fs");
+
 /**
  * -------------------------------------------------
  *@desc   : get users profile
@@ -114,11 +116,10 @@ const uploadProfilePhoto = asyncHandler(async (req, res) => {
 
   const result = await cloudinaryUploadImage(imagePath);
 
-  const user = await User.findById(req.params.id);
+  const user = await User.findById(req.user.id);
 
-  // Check if user has a profile photo
-  if (user.profilePhoto && user.profilePhoto.publicId !== null) {
-    await cloudinaryRemoveImage(user.profilePhoto.publicId);
+  if (!user) {
+    return res.status(404).json({ message: "user is not found" });
   }
 
   user.profilePhoto = {
@@ -126,14 +127,27 @@ const uploadProfilePhoto = asyncHandler(async (req, res) => {
     publicId: result.public_Id,
   };
 
+  // Check if user has a profile photo
+  if (user.profilePhoto && user.profilePhoto.publicId !== null) {
+    await cloudinaryRemoveImage(user.profilePhoto.publicId);
+  }
+
   await user.save();
 
-  return res.status(200).json({
+  res.status(200).json({
     message: "your profile photo uploaded successfully",
     profilePhoto: {
       url: result.secure_url,
       publicId: result.public_Id,
     },
+  });
+
+  fs.unlink(imagePath, (err) => {
+    if (err) {
+      console.error("Error deleting image:", err);
+    } else {
+      console.log("Image deleted successfully");
+    }
   });
 });
 
@@ -152,7 +166,10 @@ const deleteUserProfile = asyncHandler(async (req, res) => {
     return res.status(404).json({ message: "user not found" });
   }
 
-  return res.json({ message: "done" });
+  await cloudinaryRemoveImage(user.profilePhoto.publicId);
+  await User.findByIdAndDelete(req.params.id);
+
+  return res.json({ message: "your account has been deleted!" });
 });
 
 module.exports = {

@@ -23,7 +23,7 @@ router.get("/count", verifyTokenAndAdmin, getUsersCount);
 router.get("/:id", validateObjectId, verifyToken, getUserProfile);
 router.put("/:id", validateObjectId, verifyTokenAndEditUser, editUserProfile);
 router.post(
-  "/profile-photo",
+  "/profile-photo/",
   verifyToken,
   photoUpload.single("image"),
   uploadProfilePhoto
