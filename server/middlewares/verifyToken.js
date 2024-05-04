@@ -41,4 +41,19 @@ function verifyTokenAndEditUser(req, res, next) {
   });
 }
 
-module.exports = { verifyTokenAndAdmin, verifyTokenAndEditUser, verifyToken };
+function verifyTokenAndAuth(req, res, next) {
+  verifyToken(req, res, () => {
+    if (req.user.id === req.params.id || req.user.isAdmin) {
+      next();
+    } else {
+      return res.status(403).json({ message: "your not allowed" });
+    }
+  });
+}
+
+module.exports = {
+  verifyTokenAndAdmin,
+  verifyTokenAndEditUser,
+  verifyToken,
+  verifyTokenAndAuth,
+};

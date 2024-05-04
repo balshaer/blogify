@@ -17,7 +17,6 @@ const photoStorage = multer.diskStorage({
 });
 
 //photo upload
-
 const photoUpload = multer({
   storage: photoStorage,
 

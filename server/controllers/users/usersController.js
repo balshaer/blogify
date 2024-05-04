@@ -137,10 +137,29 @@ const uploadProfilePhoto = asyncHandler(async (req, res) => {
   });
 });
 
+/**
+ * -------------------------------------------------
+ *@desc   : delete user profile
+ *@router : /api/users/profile/:id
+ *@method : DELETE
+ *@access : private (only himself or admin)
+ *-------------------------------------------------
+ **/
+
+const deleteUserProfile = asyncHandler(async (req, res) => {
+  const user = await User.findById(req.params.id);
+  if (!user) {
+    return res.status(404).json({ message: "user not found" });
+  }
+
+  return res.json({ message: "done" });
+});
+
 module.exports = {
   getAllUsers,
   getUsersCount,
   getUserProfile,
   editUserProfile,
   uploadProfilePhoto,
+  deleteUserProfile,
 };
